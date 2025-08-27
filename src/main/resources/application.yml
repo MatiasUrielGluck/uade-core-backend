@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: core-hub-backend
+  profiles:
+    active: local
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO

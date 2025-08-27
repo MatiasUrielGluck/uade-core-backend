@@ -1,0 +1,9 @@
+corehub:
+  channels:
+    - name: "payments.order.created"
+      exchange: "corehub.x.payments"
+      routingKey: "payments.order.created"
+
+    - name: "billing.invoice.issued"
+      exchange: "corehub.x.billing"
+      routingKey: "billing.invoice.issued"
