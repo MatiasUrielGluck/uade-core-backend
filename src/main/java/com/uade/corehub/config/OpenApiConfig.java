@@ -31,6 +31,8 @@ public class OpenApiConfig {
                                 
                                 ## Características principales:
                                 - ✅ Crear, consultar y gestionar suscripciones
+                                - ✅ Endpoint `GET /list` para listar eventos suscritos
+                                - ✅ Endpoint `DELETE /unsubscribe/{id}` para eliminar suscripciones
                                 - ✅ Soporte para wildcards (* y #) en tópicos y eventos
                                 - ✅ Validaciones robustas de datos de entrada
                                 - ✅ Persistencia en base de datos PostgreSQL

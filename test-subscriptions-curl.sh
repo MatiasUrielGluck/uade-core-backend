@@ -22,7 +22,7 @@ echo "Creando suscripción 1 (sin wildcards)..."
 RESPONSE1=$(curl -s -X POST "$BASE_URL/subscribe" \
   -H "Content-Type: application/json" \
   -d '{
-    "webhookUrl": "https://payments-squad.com/webhook",
+    "webhookUrl": "http://localhost:8000",
     "squadName": "payments-squad",
     "topic": "payments.order.created",
     "eventName": "orderCreated"
@@ -33,7 +33,7 @@ echo "Creando suscripción 2 (con wildcard *)..."
 RESPONSE2=$(curl -s -X POST "$BASE_URL/subscribe" \
   -H "Content-Type: application/json" \
   -d '{
-    "webhookUrl": "https://notifications-squad.com/webhook",
+    "webhookUrl": "https://localhost:8000",
     "squadName": "notifications-squad",
     "topic": "payments.order.*",
     "eventName": "order*"
@@ -44,7 +44,7 @@ echo "Creando suscripción 3 (con wildcard #)..."
 RESPONSE3=$(curl -s -X POST "$BASE_URL/subscribe" \
   -H "Content-Type: application/json" \
   -d '{
-    "webhookUrl": "https://analytics-squad.com/webhook",
+    "webhookUrl": "https://localhost:8000",
     "squadName": "analytics-squad",
     "topic": "#.order.#",
     "eventName": "#"
@@ -70,6 +70,12 @@ echo ""
 echo "2️⃣ Consultando todas las suscripciones..."
 echo "Respuesta:"
 curl -s -X GET "$BASE_URL/subscribe"
+
+# 2.5. Listar eventos suscritos
+echo ""
+echo "2️⃣5️⃣ Listando eventos suscritos..."
+echo "Respuesta:"
+curl -s -X GET "$BASE_URL/list"
 
 # 3. Consultar suscripciones por squad
 echo ""
@@ -138,7 +144,7 @@ curl -s -X POST "$BASE_URL/subscribe" \
 echo ""
 echo "8️⃣ Eliminando suscripción..."
 echo "Eliminando suscripción $ID3..."
-curl -s -X DELETE "$BASE_URL/subscribe/$ID3"
+curl -s -X DELETE "$BASE_URL/unsubscribe/$ID3"
 echo "✅ Suscripción eliminada"
 
 echo ""

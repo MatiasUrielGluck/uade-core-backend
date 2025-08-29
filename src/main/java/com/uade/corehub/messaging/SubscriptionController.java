@@ -317,6 +317,8 @@ public class SubscriptionController {
         }
     }
 
+
+
     /**
      * Endpoint para obtener suscripciones por squad
      * GET /subscribe/squad/{squadName}
@@ -424,55 +426,7 @@ public class SubscriptionController {
         }
     }
 
-    /**
-     * Endpoint para eliminar una suscripción
-     * DELETE /subscribe/{subscriptionId}
-     * 
-     * @param subscriptionId ID de la suscripción a eliminar
-     * @return 200 si se eliminó correctamente, 404 si no existe
-     */
-    @Operation(
-        summary = "Eliminar suscripción",
-        description = "Elimina permanentemente una suscripción del sistema"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Suscripción eliminada correctamente"
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Suscripción no encontrada"
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Error interno del servidor"
-        )
-    })
-    @DeleteMapping("/{subscriptionId}")
-    public ResponseEntity<Void> deleteSubscription(
-        @Parameter(
-            description = "ID único de la suscripción a eliminar",
-            example = "550e8400-e29b-41d4-a716-446655440000"
-        )
-        @PathVariable String subscriptionId
-    ) {
-        try {
-            log.info("Eliminando suscripción: {}", subscriptionId);
-            
-            boolean deleted = subscriptionService.deleteSubscription(subscriptionId);
-            
-            if (deleted) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.notFound().build();
-            }
-            
-        } catch (Exception e) {
-            log.error("Error al eliminar suscripción: {}", subscriptionId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+
 
     /**
      * Endpoint para obtener estadísticas de suscripciones por squad
