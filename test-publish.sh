@@ -95,6 +95,7 @@ echo ""
 echo "🔧 1. VERIFICANDO INFRAESTRUCTURA"
 echo "================================="
 
+make_request "GET" "$BASE_URL/channels/infrastructure/status" "" "Verificando estado de inicialización de infraestructura"
 make_request "GET" "$BASE_URL/channels/debug/infrastructure" "" "Verificando estado de infraestructura"
 
 echo ""
@@ -202,6 +203,7 @@ print_status "Verificaciones finales:"
 echo ""
 
 # Verificar infraestructura final
+make_request "GET" "$BASE_URL/channels/infrastructure/status" "" "Estado final de inicialización"
 make_request "GET" "$BASE_URL/channels/debug/infrastructure" "" "Estado final de infraestructura"
 
 echo ""
@@ -220,8 +222,9 @@ else
     echo "5. Verificar que los mensajes aparezcan en las colas"
 fi
 echo ""
-print_warning "🚨 PROBLEMA CONOCIDO:"
-echo "Si los mensajes no aparecen en RabbitMQ GUI, revisar logs de la aplicación"
-echo "El problema puede estar en la lógica de idempotencia (PublishService.java líneas 39-42)"
+print_warning "🚨 IMPORTANTE:"
+echo "La aplicación ahora INICIALIZA automáticamente la infraestructura al arrancar"
+echo "Si recibes 404, significa que la inicialización falló o el canal no está configurado"
+echo "Verifica el estado de inicialización con: $BASE_URL/channels/infrastructure/status"
 echo ""
-print_status "Revisar logs de la aplicación para ver el flujo completo de publicación"
+print_status "Revisar logs de la aplicación para ver el flujo completo de inicialización"

@@ -23,7 +23,9 @@ spring:
     virtual-host: /
 
   config:
-    import: "classpath:channels.yaml"
+    import: 
+      - "classpath:channels.yaml"
+      - "classpath:rabbitmq-infrastructure.yaml"
 
 logging:
   level:

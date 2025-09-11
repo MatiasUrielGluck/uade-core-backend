@@ -1,7 +1,8 @@
 package com.uade.corehub.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureService;
+import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureValidator;
+import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureInitializer;
 import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -51,13 +52,27 @@ public class RabbitConfig {
 	}
 
 	/**
-	 * Inicialización automática de la infraestructura de RabbitMQ
-	 * Crea exchanges, colas y bindings específicos para cada canal
+	 * Inicialización de infraestructura de RabbitMQ al iniciar
+	 * Crea exchanges, colas y bindings desde el archivo de configuración
 	 */
 	@Bean
-	public CommandLineRunner setupRabbitMQInfrastructure(RabbitMQInfrastructureService infrastructureService) {
+	public CommandLineRunner initializeRabbitMQInfrastructure(RabbitMQInfrastructureInitializer infrastructureInitializer) {
 		return args -> {
-			infrastructureService.initializeAllChannels();
+			// El inicializador ya implementa CommandLineRunner, no necesitamos hacer nada aquí
+			// Solo registramos el bean para que se ejecute automáticamente
+		};
+	}
+
+	/**
+	 * Validación de infraestructura de RabbitMQ después de la inicialización
+	 * Valida que existan exchanges, colas y bindings para cada canal
+	 */
+	@Bean
+	public CommandLineRunner validateRabbitMQInfrastructure(RabbitMQInfrastructureValidator infrastructureValidator) {
+		return args -> {
+			// Esperar un poco para que la inicialización termine
+			Thread.sleep(1000);
+			infrastructureValidator.validateAllInfrastructure();
 		};
 	}
 

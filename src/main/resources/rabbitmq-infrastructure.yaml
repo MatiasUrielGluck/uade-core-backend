@@ -1,0 +1,162 @@
+# Configuración de Infraestructura RabbitMQ
+# Este archivo define todos los exchanges, colas y bindings que deben existir
+
+rabbitmq:
+  infrastructure:
+    # Exchanges por squad
+    exchanges:
+      - name: "corehub.x.payments"
+        type: "topic"
+        durable: true
+        autoDelete: false
+        description: "Exchange para eventos del squad de pagos"
+        
+      - name: "corehub.x.billing"
+        type: "topic"
+        durable: true
+        autoDelete: false
+        description: "Exchange para eventos del squad de facturación"
+        
+      - name: "corehub.x.orders"
+        type: "topic"
+        durable: true
+        autoDelete: false
+        description: "Exchange para eventos del squad de órdenes"
+        
+      - name: "corehub.x.inventory"
+        type: "topic"
+        durable: true
+        autoDelete: false
+        description: "Exchange para eventos del squad de inventario"
+
+    # Colas por evento
+    queues:
+      # Squad Payments
+      - name: "payments.order.created"
+        durable: true
+        autoDelete: false
+        description: "Cola para órdenes de pago creadas"
+        
+      - name: "payments.order.canceled"
+        durable: true
+        autoDelete: false
+        description: "Cola para órdenes de pago canceladas"
+        
+      - name: "payments.payment.processed"
+        durable: true
+        autoDelete: false
+        description: "Cola para pagos procesados"
+        
+      - name: "payments.payment.failed"
+        durable: true
+        autoDelete: false
+        description: "Cola para pagos fallidos"
+
+      # Squad Billing
+      - name: "billing.invoice.issued"
+        durable: true
+        autoDelete: false
+        description: "Cola para facturas emitidas"
+        
+      - name: "billing.invoice.paid"
+        durable: true
+        autoDelete: false
+        description: "Cola para facturas pagadas"
+        
+      - name: "billing.subscription.created"
+        durable: true
+        autoDelete: false
+        description: "Cola para suscripciones creadas"
+
+      # Squad Orders
+      - name: "orders.order.created"
+        durable: true
+        autoDelete: false
+        description: "Cola para órdenes creadas"
+        
+      - name: "orders.order.shipped"
+        durable: true
+        autoDelete: false
+        description: "Cola para órdenes enviadas"
+        
+      - name: "orders.order.delivered"
+        durable: true
+        autoDelete: false
+        description: "Cola para órdenes entregadas"
+
+      # Squad Inventory
+      - name: "inventory.stock.low"
+        durable: true
+        autoDelete: false
+        description: "Cola para alertas de stock bajo"
+        
+      - name: "inventory.product.updated"
+        durable: true
+        autoDelete: false
+        description: "Cola para productos actualizados"
+
+    # Bindings específicos
+    bindings:
+      # Payments bindings
+      - exchange: "corehub.x.payments"
+        queue: "payments.order.created"
+        routingKey: "payments.order.created"
+        description: "Binding para órdenes de pago creadas"
+        
+      - exchange: "corehub.x.payments"
+        queue: "payments.order.canceled"
+        routingKey: "payments.order.canceled"
+        description: "Binding para órdenes de pago canceladas"
+        
+      - exchange: "corehub.x.payments"
+        queue: "payments.payment.processed"
+        routingKey: "payments.payment.processed"
+        description: "Binding para pagos procesados"
+        
+      - exchange: "corehub.x.payments"
+        queue: "payments.payment.failed"
+        routingKey: "payments.payment.failed"
+        description: "Binding para pagos fallidos"
+
+      # Billing bindings
+      - exchange: "corehub.x.billing"
+        queue: "billing.invoice.issued"
+        routingKey: "billing.invoice.issued"
+        description: "Binding para facturas emitidas"
+        
+      - exchange: "corehub.x.billing"
+        queue: "billing.invoice.paid"
+        routingKey: "billing.invoice.paid"
+        description: "Binding para facturas pagadas"
+        
+      - exchange: "corehub.x.billing"
+        queue: "billing.subscription.created"
+        routingKey: "billing.subscription.created"
+        description: "Binding para suscripciones creadas"
+
+      # Orders bindings
+      - exchange: "corehub.x.orders"
+        queue: "orders.order.created"
+        routingKey: "orders.order.created"
+        description: "Binding para órdenes creadas"
+        
+      - exchange: "corehub.x.orders"
+        queue: "orders.order.shipped"
+        routingKey: "orders.order.shipped"
+        description: "Binding para órdenes enviadas"
+        
+      - exchange: "corehub.x.orders"
+        queue: "orders.order.delivered"
+        routingKey: "orders.order.delivered"
+        description: "Binding para órdenes entregadas"
+
+      # Inventory bindings
+      - exchange: "corehub.x.inventory"
+        queue: "inventory.stock.low"
+        routingKey: "inventory.stock.low"
+        description: "Binding para alertas de stock bajo"
+        
+      - exchange: "corehub.x.inventory"
+        queue: "inventory.product.updated"
+        routingKey: "inventory.product.updated"
+        description: "Binding para productos actualizados"

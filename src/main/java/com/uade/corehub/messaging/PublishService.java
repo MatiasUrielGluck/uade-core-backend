@@ -4,7 +4,7 @@ import com.uade.corehub.channels.ChannelRegistry;
 import com.uade.corehub.channels.ChannelRegistryProperties;
 import com.uade.corehub.messaging.broker.RabbitPublisher;
 import com.uade.corehub.messaging.dto.MessageEnvelope;
-import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureService;
+import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureValidator;
 import com.uade.corehub.messaging.store.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +23,20 @@ public class PublishService {
 	private final RabbitPublisher rabbitPublisher;
 	private final MessageLogRepository messageLogRepo;
 	private final PayloadStoreRepository payloadRepo;
-	private final RabbitMQInfrastructureService infrastructureService;
+	private final RabbitMQInfrastructureValidator infrastructureValidator;
 
 	@Transactional
 	public void publish(MessageEnvelope env, String correlationId) {
 
-		// 1) Canal válido o crear dinámicamente
+		// 1) Canal válido (NO crear dinámicamente)
 		var ch = channelRegistry.find(env.destination().channel())
-				.orElseGet(() -> createChannelDynamically(env.destination().channel()));
+				.orElseThrow(() -> new IllegalArgumentException("Channel not found: " + env.destination().channel()));
 
-		// 2) Asegurar infraestructura
-		infrastructureService.ensureInfrastructureForChannel(env.destination().channel());
+		// 2) Validar que la infraestructura existe (NO crear automáticamente)
+		if (!infrastructureValidator.validateInfrastructureForChannel(env.destination().channel())) {
+			throw new IllegalArgumentException("Infrastructure not found for channel: " + env.destination().channel() + 
+					". Please ensure the exchange, queue and binding exist in RabbitMQ.");
+		}
 
 		// 3) Idempotencia
 		var existing = messageLogRepo.findByMessageId(env.messageId());
@@ -91,41 +94,4 @@ public class PublishService {
 		}
 	}
 
-	/**
-	 * Crea un canal dinámicamente basándose en el nombre del canal
-	 */
-	private ChannelRegistryProperties.Channel createChannelDynamically(String channelName) {
-		try {
-			String[] parts = channelName.split("\\.");
-			if (parts.length < 2) {
-				throw new IllegalArgumentException("Channel name must follow pattern: squad.topic.event (e.g., payments.order.created)");
-			}
-
-			String squad = parts[0];
-			String exchange = "corehub.x." + squad;
-			String routingKey = channelName;
-
-			var channel = new ChannelRegistryProperties.Channel();
-			channel.setName(channelName);
-			channel.setExchange(exchange);
-			channel.setRoutingKey(routingKey);
-
-			// Agregar al registry
-			boolean added = channelRegistry.addChannel(channel);
-			if (!added) {
-				// Si no se pudo agregar, intentar obtener el existente
-				return channelRegistry.find(channelName)
-						.orElseThrow(() -> new IllegalArgumentException("Failed to create or find channel: " + channelName));
-			}
-
-			log.info("Created channel dynamically: {} -> exchange: {}, routingKey: {}", 
-					channelName, exchange, routingKey);
-
-			return channel;
-
-		} catch (Exception e) {
-			log.error("Failed to create channel dynamically: {}", channelName, e);
-			throw new IllegalArgumentException("Cannot create channel dynamically: " + channelName + " - " + e.getMessage());
-		}
-	}
 }

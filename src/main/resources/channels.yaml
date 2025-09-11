@@ -1,9 +1,53 @@
 corehub:
   channels:
+    # Squad Payments
     - name: "payments.order.created"
       exchange: "corehub.x.payments"
       routingKey: "payments.order.created"
 
+    - name: "payments.order.canceled"
+      exchange: "corehub.x.payments"
+      routingKey: "payments.order.canceled"
+
+    - name: "payments.payment.processed"
+      exchange: "corehub.x.payments"
+      routingKey: "payments.payment.processed"
+
+    - name: "payments.payment.failed"
+      exchange: "corehub.x.payments"
+      routingKey: "payments.payment.failed"
+
+    # Squad Billing
     - name: "billing.invoice.issued"
       exchange: "corehub.x.billing"
       routingKey: "billing.invoice.issued"
+
+    - name: "billing.invoice.paid"
+      exchange: "corehub.x.billing"
+      routingKey: "billing.invoice.paid"
+
+    - name: "billing.subscription.created"
+      exchange: "corehub.x.billing"
+      routingKey: "billing.subscription.created"
+
+    # Squad Orders
+    - name: "orders.order.created"
+      exchange: "corehub.x.orders"
+      routingKey: "orders.order.created"
+
+    - name: "orders.order.shipped"
+      exchange: "corehub.x.orders"
+      routingKey: "orders.order.shipped"
+
+    - name: "orders.order.delivered"
+      exchange: "corehub.x.orders"
+      routingKey: "orders.order.delivered"
+
+    # Squad Inventory
+    - name: "inventory.stock.low"
+      exchange: "corehub.x.inventory"
+      routingKey: "inventory.stock.low"
+
+    - name: "inventory.product.updated"
+      exchange: "corehub.x.inventory"
+      routingKey: "inventory.product.updated"

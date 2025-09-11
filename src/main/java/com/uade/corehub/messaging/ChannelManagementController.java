@@ -2,7 +2,8 @@ package com.uade.corehub.messaging;
 
 import com.uade.corehub.channels.ChannelRegistry;
 import com.uade.corehub.channels.ChannelRegistryProperties;
-import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureService;
+import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureValidator;
+import com.uade.corehub.messaging.infrastructure.RabbitMQInfrastructureInitializer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,8 @@ import java.util.Optional;
 public class ChannelManagementController {
 
     private final ChannelRegistry channelRegistry;
-    private final RabbitMQInfrastructureService infrastructureService;
+    private final RabbitMQInfrastructureValidator infrastructureValidator;
+    private final RabbitMQInfrastructureInitializer infrastructureInitializer;
 
     @GetMapping("/{channelName}/status")
     @Operation(summary = "Verificar estado del canal")
@@ -35,7 +37,7 @@ public class ChannelManagementController {
             return ResponseEntity.notFound().build();
         }
 
-        boolean infrastructureReady = infrastructureService.isInfrastructureReady(channelName);
+        boolean infrastructureReady = infrastructureValidator.isInfrastructureReady(channelName);
         
         Map<String, Object> status = Map.of(
             "channelName", channelName,
@@ -58,12 +60,12 @@ public class ChannelManagementController {
         }
 
         try {
-            boolean success = infrastructureService.ensureInfrastructureForChannel(channelName);
+            boolean success = infrastructureValidator.validateInfrastructureForChannel(channelName);
             
             Map<String, Object> result = Map.of(
                 "channelName", channelName,
                 "success", success,
-                "message", success ? "Infraestructura creada exitosamente" : "Error al crear la infraestructura"
+                "message", success ? "Infraestructura validada exitosamente" : "Infraestructura no existe"
             );
 
             return ResponseEntity.ok(result);
@@ -90,7 +92,7 @@ public class ChannelManagementController {
                 entry -> Map.of(
                     "exchange", entry.getValue().getExchange(),
                     "routingKey", entry.getValue().getRoutingKey(),
-                    "infrastructureReady", infrastructureService.isInfrastructureReady(entry.getKey())
+                    "infrastructureReady", infrastructureValidator.isInfrastructureReady(entry.getKey())
                 )
             ));
 
@@ -106,11 +108,11 @@ public class ChannelManagementController {
     @Operation(summary = "Inicializar toda la infraestructura")
     public ResponseEntity<Map<String, Object>> initializeAllInfrastructure() {
         try {
-            infrastructureService.initializeAllChannels();
+            infrastructureValidator.validateAllInfrastructure();
             
             Map<String, Object> result = Map.of(
                 "success", true,
-                "message", "Infraestructura inicializada para todos los canales"
+                "message", "Infraestructura validada para todos los canales"
             );
 
             return ResponseEntity.ok(result);
@@ -176,7 +178,7 @@ public class ChannelManagementController {
                     "channelName", entry.getKey(),
                     "exchange", entry.getValue().getExchange(),
                     "routingKey", entry.getValue().getRoutingKey(),
-                    "infrastructureReady", infrastructureService.isInfrastructureReady(entry.getKey()),
+                    "infrastructureReady", infrastructureValidator.isInfrastructureReady(entry.getKey()),
                     "note", "Verifica en RabbitMQ GUI: Exchanges, Queues y Bindings"
                 )
             ));
@@ -193,6 +195,45 @@ public class ChannelManagementController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/infrastructure/status")
+    @Operation(summary = "Estado de la inicialización de infraestructura")
+    public ResponseEntity<Map<String, Object>> getInfrastructureStatus() {
+        try {
+            var status = infrastructureInitializer.getInfrastructureStatus();
+            
+            Map<String, Object> response = Map.of(
+                "initializationComplete", status.isComplete(),
+                "exchanges", Map.of(
+                    "total", status.totalExchanges(),
+                    "created", status.createdExchanges(),
+                    "missing", status.totalExchanges() - status.createdExchanges()
+                ),
+                "queues", Map.of(
+                    "total", status.totalQueues(),
+                    "created", status.createdQueues(),
+                    "missing", status.totalQueues() - status.createdQueues()
+                ),
+                "bindings", Map.of(
+                    "total", status.totalBindings(),
+                    "created", status.createdBindings(),
+                    "missing", status.totalBindings() - status.createdBindings()
+                ),
+                "message", status.isComplete() ? 
+                    "Infraestructura inicializada completamente" : 
+                    "Infraestructura parcialmente inicializada"
+            );
+
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            Map<String, Object> error = Map.of(
+                "error", "Failed to get infrastructure status",
+                "message", e.getMessage()
+            );
+            return ResponseEntity.internalServerError().body(error);
+        }
     }
 
 }

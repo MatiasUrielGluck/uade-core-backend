@@ -18,14 +18,21 @@ public class PublishController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Void> publish(@Valid @RequestBody MessageEnvelope envelope,
+	public ResponseEntity<?> publish(@Valid @RequestBody MessageEnvelope envelope,
 																			@RequestHeader(value = "X-Correlation-Id", required = false) String correlationId) {
 		log.info("Received publish request - MessageId: '{}', Channel: '{}', CorrelationId: '{}'", 
 				envelope.messageId(), envelope.destination().channel(), correlationId);
 		
-		service.publish(envelope, correlationId);
-		
-		log.info("Publish request completed - MessageId: '{}'", envelope.messageId());
-		return ResponseEntity.accepted().build();
+		try {
+			service.publish(envelope, correlationId);
+			log.info("Publish request completed - MessageId: '{}'", envelope.messageId());
+			return ResponseEntity.accepted().build();
+		} catch (IllegalArgumentException e) {
+			log.warn("Publish request failed - MessageId: '{}', Error: {}", envelope.messageId(), e.getMessage());
+			return ResponseEntity.notFound().build();
+		} catch (Exception e) {
+			log.error("Publish request failed - MessageId: '{}', Error: {}", envelope.messageId(), e.getMessage(), e);
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 }
