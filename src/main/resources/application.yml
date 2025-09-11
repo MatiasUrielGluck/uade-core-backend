@@ -31,4 +31,9 @@ springdoc:
     doc-expansion: none
     disable-swagger-default-url: true
     display-request-duration: true
+    urls:
+      - name: Local Development
+        url: http://localhost:8080/api-docs
+      - name: Cloud Production
+        url: http://arreglaya-core-backend.us-east-1.elasticbeanstalk.com/api-docs
   packages-to-scan: com.uade.corehub.messaging
