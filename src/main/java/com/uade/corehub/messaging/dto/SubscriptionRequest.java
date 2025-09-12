@@ -35,8 +35,10 @@ public record SubscriptionRequest(
         maxLength = 500
     )
     @NotBlank(message = "La URL del webhook es obligatoria")
-    @Pattern(regexp = "^(https?://)[\\w\\-]+(\\.[\\w\\-]+)+([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?$", 
-             message = "La URL del webhook debe ser una URL válida")
+    @Pattern(
+            regexp = "^(https?://)(localhost|\\d{1,3}(?:\\.\\d{1,3}){3}|[\\w\\-]+(?:\\.[\\w\\-]+)+)(?::\\d+)?([\\w\\-.,@?^=%&:/~+#]*[\\w\\-@?^=%&/~+#])?$",
+            message = "La URL del webhook debe ser una URL válida"
+    )
     @Size(max = 500, message = "La URL del webhook no puede exceder 500 caracteres")
     String webhookUrl,
     

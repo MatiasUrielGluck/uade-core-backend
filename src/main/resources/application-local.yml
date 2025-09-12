@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${POSTGRES_URL}
+    url: ${POSTGRES_URL}?serverTimezone=America/Argentina/Buenos_Aires
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
 
